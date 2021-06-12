@@ -66,13 +66,14 @@ public class DataSiswa extends javax.swing.JFrame {
         jLabel1 = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
         tbl_siswa = new javax.swing.JTable();
-        jToggleButton1 = new javax.swing.JToggleButton();
-        jToggleButton2 = new javax.swing.JToggleButton();
-        jToggleButton3 = new javax.swing.JToggleButton();
-        jToggleButton4 = new javax.swing.JToggleButton();
+        cmdTambah = new javax.swing.JToggleButton();
+        cmdEdit = new javax.swing.JToggleButton();
+        cmdHapus = new javax.swing.JToggleButton();
+        cmdRefresh = new javax.swing.JToggleButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
+        jLabel1.setFont(new java.awt.Font("Times New Roman", 1, 18)); // NOI18N
         jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabel1.setLabelFor(this);
         jLabel1.setText("Data Siswa");
@@ -88,28 +89,43 @@ public class DataSiswa extends javax.swing.JFrame {
                 "Title 1", "Title 2", "Title 3", "Title 4"
             }
         ));
+        tbl_siswa.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                tbl_siswaMouseClicked(evt);
+            }
+        });
         jScrollPane1.setViewportView(tbl_siswa);
 
-        jToggleButton1.setText("Tambah");
+        cmdTambah.setText("Tambah");
+        cmdTambah.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cmdTambahActionPerformed(evt);
+            }
+        });
 
-        jToggleButton2.setText("Ubah");
+        cmdEdit.setText("Ubah");
 
-        jToggleButton3.setText("Hapus");
+        cmdHapus.setText("Hapus");
+        cmdHapus.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cmdHapusActionPerformed(evt);
+            }
+        });
 
-        jToggleButton4.setText("Refresh");
+        cmdRefresh.setText("Refresh");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addComponent(jToggleButton4)
+                .addComponent(cmdRefresh)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(jToggleButton1)
+                .addComponent(cmdTambah)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jToggleButton2)
+                .addComponent(cmdEdit)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jToggleButton3))
+                .addComponent(cmdHapus))
             .addGroup(layout.createSequentialGroup()
                 .addGap(87, 87, 87)
                 .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 212, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -127,14 +143,48 @@ public class DataSiswa extends javax.swing.JFrame {
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 206, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 46, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jToggleButton1)
-                    .addComponent(jToggleButton2)
-                    .addComponent(jToggleButton3)
-                    .addComponent(jToggleButton4)))
+                    .addComponent(cmdTambah)
+                    .addComponent(cmdEdit)
+                    .addComponent(cmdHapus)
+                    .addComponent(cmdRefresh)))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void cmdTambahActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdTambahActionPerformed
+        // TODO add your handling code here:
+        ManageData tambahData = new ManageData(this, true);
+        tambahData.setVisible(true);
+    }//GEN-LAST:event_cmdTambahActionPerformed
+    int baris;
+    private void tbl_siswaMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tbl_siswaMouseClicked
+        // TODO add your handling code here:
+        baris = tbl_siswa.getSelectedRow();
+    }//GEN-LAST:event_tbl_siswaMouseClicked
+
+    private void cmdHapusActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdHapusActionPerformed
+        // TODO add your handling code here:
+         String idWhoWantToBeDelete = tbl_siswa.getValueAt(baris, 1).toString();
+        
+        try{
+            // TODO add your handling code here:
+            Statement stmt = koneksi.createStatement();
+            String query = "DELETE FROM t_siswa WHERE nis = "+idWhoWantToBeDelete+";";
+            System.out.println(idWhoWantToBeDelete);
+            int berhasil = stmt.executeUpdate(query);
+            if (berhasil == 1){
+                JOptionPane.showMessageDialog(null, "Data Berhasil Dihapus");
+                dtm.getDataVector().removeAllElements();
+                showData();
+            } else {
+                JOptionPane.showMessageDialog(null, "Data Tidak Bisa Dihapus");
+            }
+        } catch (SQLException ex){
+            ex.printStackTrace();
+        }
+    
+    }//GEN-LAST:event_cmdHapusActionPerformed
 
     /**
      * @param args the command line arguments
@@ -172,12 +222,12 @@ public class DataSiswa extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JToggleButton cmdEdit;
+    private javax.swing.JToggleButton cmdHapus;
+    private javax.swing.JToggleButton cmdRefresh;
+    private javax.swing.JToggleButton cmdTambah;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JToggleButton jToggleButton1;
-    private javax.swing.JToggleButton jToggleButton2;
-    private javax.swing.JToggleButton jToggleButton3;
-    private javax.swing.JToggleButton jToggleButton4;
     private javax.swing.JTable tbl_siswa;
     // End of variables declaration//GEN-END:variables
 }
