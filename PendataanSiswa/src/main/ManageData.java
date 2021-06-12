@@ -5,6 +5,13 @@
  */
 package main;
 
+import DatabaseConnection.DatabaseConnection;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import javax.swing.JOptionPane;
+
 /**
  *
  * @author lenovo
@@ -14,9 +21,80 @@ public class ManageData extends javax.swing.JDialog {
     /**
      * Creates new form porsesdata
      */
-    public ManageData(java.awt.Frame parent, boolean modal) {
+    Connection koneksi;
+    String action;
+    public ManageData(java.awt.Frame parent, boolean modal, String act, String nis) {
         super(parent, modal);
         initComponents();
+       koneksi = DatabaseConnection.getKoneksi("localhost", "3306", "root", "", "db_sekolah");
+       
+       action = act;
+       if(action.equals("Edit")){
+           txtNis.setEnabled(false);
+           ShowData(nis);
+       }
+    }
+    public void ShowData(String nis){
+        try {
+            Statement stmt = koneksi.createStatement();
+            String query = "SELECT * FROM t_siswa WHERE nis = " + nis + ";";
+            ResultSet rs = stmt.executeQuery(query);
+            rs.first();
+            
+            txtNis.setText(rs.getString("nis"));
+            txtNama.setText(rs.getString("nama"));
+            cmbKelas.setSelectedItem(rs.getString("kelas"));
+            cmbJurusan.setSelectedItem(rs.getString("jurusan"));
+        } catch (SQLException ex){
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(null, "Terjadi kesalahan di Query");
+        }
+    }
+    public void simpanData(){
+        String nis = txtNis.getText();
+        String nama = txtNama.getText();
+        String kelas = cmbKelas.getSelectedItem().toString();
+        String jurusan = cmbJurusan.getSelectedItem().toString();
+        
+        try {
+            Statement stmt = koneksi.createStatement();
+            String query = "INSERT INTO t_siswa(nis, nama, kelas, jurusan) " 
+                    + "VALUES('"+nis+"', '"+nama+"', '"+kelas+"', '"+jurusan+"')";
+            System.out.println(query);
+            int berhasil = stmt.executeUpdate(query);
+            if (berhasil == 1){
+                JOptionPane.showMessageDialog(null, "Data Berhasil Dimasukkan");
+            } else {
+                JOptionPane.showMessageDialog(null, "Data Gagal Dimasukkan");
+            }
+        } catch (SQLException ex){
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(null, "Terjadi Kesalahan Pada Database");
+        }
+    }
+    public void EditData(){
+        String nis = txtNis.getText();
+        String nama = txtNama.getText();
+        String kelas = cmbKelas.getSelectedItem().toString();
+        String jurusan = cmbJurusan.getSelectedItem().toString();
+        
+        try{
+            Statement stmt = koneksi.createStatement();
+            String query = "UPDATE t_siswa SET nama = '" + nama +"',"
+                            + "kelas = '" + kelas +"',"
+                            + "jurusan = '" + jurusan + "' WHERE nis = '" + nis +"';";
+            
+            System.out.println(query);
+            int berhasil = stmt.executeUpdate(query);
+            if (berhasil == 1){
+                JOptionPane.showMessageDialog(null, "Data Berhasil Diubah");
+            } else {
+                JOptionPane.showMessageDialog(null, "Data Gagal Diubah");
+            }
+        } catch (SQLException ex){
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(null, "Terjadi Kesalahan Pada Query");
+        }
     }
 
     /**
@@ -37,7 +115,8 @@ public class ManageData extends javax.swing.JDialog {
         jLabel4 = new javax.swing.JLabel();
         cmbKelas = new javax.swing.JComboBox<>();
         jLabel5 = new javax.swing.JLabel();
-        jComboBox1 = new javax.swing.JComboBox<>();
+        cmbJurusan = new javax.swing.JComboBox<>();
+        btnSimpan = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Tambah Data");
@@ -77,8 +156,15 @@ public class ManageData extends javax.swing.JDialog {
         jLabel5.setFont(new java.awt.Font("Times New Roman", 0, 14)); // NOI18N
         jLabel5.setText("Jurusan");
 
-        jComboBox1.setFont(new java.awt.Font("Times New Roman", 0, 14)); // NOI18N
-        jComboBox1.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Rekayasa Perangkat Lunak", "Teknik Komputer Jaringan", "Multimedia", "Teknik Audio Video", "Teknik Instalasi Tenaga Listrik", "Teknik Otomasi Industri", "" }));
+        cmbJurusan.setFont(new java.awt.Font("Times New Roman", 0, 14)); // NOI18N
+        cmbJurusan.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Rekayasa Perangkat Lunak", "Teknik Komputer Jaringan", "Multimedia", "Teknik Audio Video", "Teknik Instalasi Tenaga Listrik", "Teknik Otomasi Industri", "" }));
+
+        btnSimpan.setText("Simpan");
+        btnSimpan.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnSimpanActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -108,8 +194,12 @@ public class ManageData extends javax.swing.JDialog {
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addComponent(cmbKelas, javax.swing.GroupLayout.PREFERRED_SIZE, 151, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, 117, javax.swing.GroupLayout.PREFERRED_SIZE))))))
+                                    .addComponent(cmbJurusan, javax.swing.GroupLayout.PREFERRED_SIZE, 117, javax.swing.GroupLayout.PREFERRED_SIZE))))))
                 .addContainerGap(50, Short.MAX_VALUE))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addGap(0, 0, Short.MAX_VALUE)
+                .addComponent(btnSimpan)
+                .addGap(63, 63, 63))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -132,8 +222,10 @@ public class ManageData extends javax.swing.JDialog {
                 .addGap(33, 33, 33)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel5)
-                    .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(102, Short.MAX_VALUE))
+                    .addComponent(cmbJurusan, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 68, Short.MAX_VALUE)
+                .addComponent(btnSimpan)
+                .addContainerGap())
         );
 
         pack();
@@ -146,6 +238,12 @@ public class ManageData extends javax.swing.JDialog {
     private void cmbKelasActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbKelasActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_cmbKelasActionPerformed
+
+    private void btnSimpanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSimpanActionPerformed
+        // TODO add your handling code here:
+       if(action.equals("Edit"))EditData();
+       else simpanData();
+    }//GEN-LAST:event_btnSimpanActionPerformed
 
     /**
      * @param args the command line arguments
@@ -174,25 +272,12 @@ public class ManageData extends javax.swing.JDialog {
         }
         //</editor-fold>
         //</editor-fold>
-
-        /* Create and display the dialog */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                ManageData dialog = new ManageData(new javax.swing.JFrame(), true);
-                dialog.addWindowListener(new java.awt.event.WindowAdapter() {
-                    @Override
-                    public void windowClosing(java.awt.event.WindowEvent e) {
-                        System.exit(0);
-                    }
-                });
-                dialog.setVisible(true);
-            }
-        });
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnSimpan;
+    private javax.swing.JComboBox<String> cmbJurusan;
     private javax.swing.JComboBox<String> cmbKelas;
-    private javax.swing.JComboBox<String> jComboBox1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
